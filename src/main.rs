@@ -4,6 +4,34 @@ extern crate rocket;
 use rocket::response::status;
 use rocket::serde::json::{json, Value};
 
+pub struct BasicAuth {
+    pub username: String,
+    pub password: String,
+}
+
+impl BasicAuth {
+    fn from_authorization_header(header: &str) -> Option<BasicAuth> {
+        let split = header.split_whitespace().collect::<Vec<&str>>();
+        if split.len() != 2 || split[0] != "Basic" {
+            return None;
+        }
+        Self::from_base64_encoded(split[1])
+    }
+
+    fn from_base64_encoded(base64_string: &str) -> Option<BasicAuth> {
+        let decoded = base64::decode(base64_string).ok()?;
+        let decoded = String::from_utf8(decoded).ok()?;
+        let split = decoded.split(":").collect::<Vec<&str>>();
+        if split.len() != 2 {
+            return None;
+        }
+
+        let (username, password) = (split[0].to_string(), split[1].to_string());
+
+        Some(BasicAuth { username, password })
+    }
+}
+
 #[get("/rustaceans")]
 fn get_rustaceans() -> Value {
     json!([
