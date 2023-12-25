@@ -1,9 +1,9 @@
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 mod auth;
 use auth::BasicAuth;
 use rocket::response::status;
 use rocket::serde::json::{json, Value};
-
 
 #[get("/rustaceans")]
 fn get_rustaceans(_auth: BasicAuth) -> Value {
@@ -28,7 +28,7 @@ fn get_rustaceans(_auth: BasicAuth) -> Value {
 }
 
 #[get("/rustaceans/<id>")]
-fn view_rustacean(id: usize,_auth: BasicAuth) -> Value {
+fn view_rustacean(id: usize, _auth: BasicAuth) -> Value {
     json!([
         {
             "name": "John Doe",
@@ -63,7 +63,7 @@ fn create_rustacean(_auth: BasicAuth) -> Value {
 }
 
 #[put("/rustaceans/<id>", format = "json")]
-fn update_rustacean(id: usize,_auth: BasicAuth) -> Value {
+fn update_rustacean(id: usize, _auth: BasicAuth) -> Value {
     json!({
     "id": id,
     "name": "John Doe",
@@ -76,7 +76,7 @@ fn update_rustacean(id: usize,_auth: BasicAuth) -> Value {
 }
 
 #[delete("/rustaceans/<id>")]
-fn delete_rustacean(id: usize,_auth: BasicAuth) -> status::NoContent {
+fn delete_rustacean(id: usize, _auth: BasicAuth) -> status::NoContent {
     status::NoContent
 }
 
