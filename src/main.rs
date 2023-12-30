@@ -15,7 +15,7 @@ use rocket::serde::json::{json, Value};
 struct DbConn(diesel::SqliteConnection);
 
 #[get("/rustaceans")]
-fn get_rustaceans(_auth: BasicAuth) -> Value {
+fn get_rustaceans(_auth: BasicAuth, _db: DbConn) -> Value {
     json!([
         {
             "name": "John Doe",
@@ -110,6 +110,7 @@ async fn main() {
                 delete_rustacean
             ],
         )
+        .attach(DbConn::fairing())
         .register("/", catchers![not_found])
         .launch()
         .await;
