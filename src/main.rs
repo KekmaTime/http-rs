@@ -1,9 +1,18 @@
 #[macro_use]
 extern crate rocket;
+
+extern crate diesel;
+
+#[macro_use]
+extern crate rocket_sync_db_pools;
 mod auth;
 use auth::BasicAuth;
 use rocket::response::status;
 use rocket::serde::json::{json, Value};
+
+#[database("sqlite")]
+
+struct DbConn(diesel::SqliteConnection);
 
 #[get("/rustaceans")]
 fn get_rustaceans(_auth: BasicAuth) -> Value {
