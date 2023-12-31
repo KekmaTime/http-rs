@@ -11,9 +11,10 @@ mod models;
 mod schema;
 use auth::BasicAuth;
 use diesel::prelude::*;
+use models::NewRustacean;
 use models::Rustacean;
 use rocket::response::status;
-use rocket::serde::json::{json, Value};
+use rocket::serde::json::{json, Json, Value};
 
 #[database("sqlite")]
 
@@ -53,17 +54,20 @@ fn view_rustacean(id: usize, _auth: BasicAuth) -> Value {
     ])
 }
 
-#[post("/rustaceans", format = "json")]
-fn create_rustacean(_auth: BasicAuth) -> Value {
-    json!({
-    "id": 3,
-    "name": "John Doe",
-    "age": 30,
-    "address": {
-        "street": "10 Downing Street",
-        "city": "London"
-        }
+#[post("/rustaceans", format = "json", data = "<new_rustacean>")]
+async fn create_rustacean(
+    _auth: BasicAuth,
+    db: DbConn,
+    new_rustacean: Json<NewRustacean>,
+) -> Value {
+    db.run(|c| {
+        let result = diesel::insert_into(schema::rustaceans::table)
+            .values(new_rustacean.into_inner())
+            .execute(c)
+            .expect("Error saving new rustacean");
+        json!(result)
     })
+    .await
 }
 
 #[put("/rustaceans/<id>", format = "json")]
