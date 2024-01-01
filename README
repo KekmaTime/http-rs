@@ -1,0 +1,1 @@
+`http-rs` is a Rust implementation of a simple RESTful Web API. It uses the Rocket framework for handling HTTP requests and Diesel for interacting with an SQLite database.
