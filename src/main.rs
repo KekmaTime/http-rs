@@ -33,25 +33,15 @@ async fn get_rustaceans(_auth: BasicAuth, db: DbConn) -> Value {
 }
 
 #[get("/rustaceans/<id>")]
-fn view_rustacean(id: usize, _auth: BasicAuth) -> Value {
-    json!([
-        {
-            "name": "John Doe",
-            "age": 30,
-            "address": {
-                "street": "10 Downing Street",
-                "city": "London"
-            }
-        },
-        {
-            "name": "Jane Doe",
-            "age": 25,
-            "address": {
-                "street": "10 Downing Street",
-                "city": "London"
-            }
-        }
-    ])
+async fn view_rustacean(id: i32, _auth: BasicAuth, db: DbConn) -> Value {
+    db.run(move |c| {
+        let result = schema::rustaceans::table
+            .find(id)
+            .get_result::<Rustacean>(c)
+            .expect("Error loading rustacean");
+        json!(result)
+    })
+    .await
 }
 
 #[post("/rustaceans", format = "json", data = "<new_rustacean>")]
@@ -70,22 +60,35 @@ async fn create_rustacean(
     .await
 }
 
-#[put("/rustaceans/<id>", format = "json")]
-fn update_rustacean(id: usize, _auth: BasicAuth) -> Value {
-    json!({
-    "id": id,
-    "name": "John Doe",
-    "age": 30,
-    "address": {
-        "street": "10 Downing Street",
-        "city": "London"
-        }
+#[put("/rustaceans/<id>", format = "json", data = "<rustacean>")]
+async fn update_rustacean(
+    id: i32,
+    _auth: BasicAuth,
+    db: DbConn,
+    rustacean: Json<Rustacean>,
+) -> Value {
+    db.run(move |c| {
+        let result = diesel::update(schema::rustaceans::table.find(id))
+            .set((
+                schema::rustaceans::name.eq(rustacean.name.to_owned()),
+                schema::rustaceans::email.eq(rustacean.email.to_owned()),
+            ))
+            .execute(c)
+            .expect("Error updating rustacean");
+        json!(result)
     })
+    .await
 }
 
 #[delete("/rustaceans/<id>")]
-fn delete_rustacean(id: usize, _auth: BasicAuth) -> status::NoContent {
-    status::NoContent
+async fn delete_rustacean(id: i32, _auth: BasicAuth, db: DbConn) -> status::NoContent {
+    db.run(move |c| {
+        diesel::delete(schema::rustaceans::table.find(id))
+            .execute(c)
+            .expect("Error deleting rustacean");
+        status::NoContent
+    })
+    .await
 }
 
 #[catch(404)]

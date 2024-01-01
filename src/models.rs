@@ -1,6 +1,6 @@
 use super::schema::rustaceans;
 
-#[derive(serde::Serialize, Queryable)]
+#[derive(serde::Serialize, Queryable, serde::Deserialize)]
 pub struct Rustacean {
     pub id: i32,
     pub name: String,
